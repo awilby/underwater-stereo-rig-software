@@ -9,7 +9,7 @@ import time
 
 from gevent import monkey
 monkey.patch_all()
-from flask import Flask, render_template, Response, jsonify
+from flask import Flask, render_template, Response, jsonify, flash
 from gevent import wsgi
 
 from socket import *
@@ -18,6 +18,7 @@ import sys
 #cam_url = 'http://10.0.0.1:10000/sony/camera'
 cam_url = "http://192.168.122.1:8080/sony/camera"
 
+# Threads that create the scream
 class LiveviewThread(threading.Thread):
     running = True
     def __init__(self):
@@ -28,8 +29,7 @@ class LiveviewThread(threading.Thread):
         s = start_liveview()
         data = open_stream(s)
         while self.running:
-            #time.sleep(2)
-           # print "get another frame"
+
             self.jpg = decode_frame(data)
     def stop_running(self):
         self.running = False
@@ -37,7 +37,7 @@ class LiveviewThread(threading.Thread):
         time.sleep(0.05)
         return self.jpg
 
-
+# Functions that communicate with minnowboard by using sony API
 def get_payload(method, params):
     return {
 	"method": method,
@@ -47,10 +47,12 @@ def get_payload(method, params):
     }
 
 def sony_api_call(action, params):
+    
     payload = get_payload(action, params)
     headers = {'Content-Type': 'application/json'}
     response = requests.post(cam_url, data=json.dumps(payload), headers=headers)
-    return response.json()['result']
+    a = response.json()
+    return a['result']
 
 def get_mode():
     return sony_api_call("getExposureMode", [])
@@ -117,7 +119,13 @@ def stop_video():
 def videoMode():
     print "setting to video mode and sending request to slave"
     cs.sendto(CONST_SET_VIDEO, (slaveIP, slavePort))
-    sony_api_call("setShootMode", ["movie"])
+    r = sony_api_call("setShootMode", ["movie"])
+    print r[0]
+    if r[0] == 0:
+        s = "set video mode sucessfully"
+    else:
+        s = "set video mode failed" 
+    return s
 
 def pictureMode():
     print "setting to picture mode and sending request to slave"
@@ -194,6 +202,7 @@ def decode_frame(data):
 
 # initialization    
 app = Flask(__name__)
+app.secret_key = "super secret key"
 LVthread = LiveviewThread()
 LVthread.start()
 
@@ -214,50 +223,69 @@ def feed():
 def take_picture_cb():
     # FIXME do something with the url
     print take_picture()
+    return "take pic"
 
 @app.route('/setMode/<mode>')
 def set_mode_cb(mode=None):
     set_mode(mode)
+    return "cool"
 
 @app.route('/setAperture/<aperture>')
 def set_aperture_cb(aperture=None):
     set_aperture(aperture)
-
+    return "oh yea"
 @app.route('/setShutter/<shutter>')
 def set_shutter_cb(shutter=None):
     shutter = shutter.replace('.', '/')
     set_shutter(shutter)
-
+    return "dope"
 @app.route('/setISO/<iso>')
 def set_iso_cb(iso=None):
     set_iso(iso)
+    return "ok"
 
 @app.route('/_data', methods=['GET', 'POST'])
 def data_cb(): 
-    mode = get_mode()
-    videoMode = get_video_mode()
-    avail_aperture = get_avail_aperture()
-    avail_shutter = get_avail_shutter()
-    avail_iso = get_avail_iso()
-    return jsonify(mode=mode, videoMode=videoMode, aperture=avail_aperture[0], shutter=avail_shutter[0], iso=avail_iso[0], avail_aperture=avail_aperture[1], avail_shutter=avail_shutter[1], avail_iso=avail_iso[1])
+    #print "result is: "
+    #event = get_event()
+    #ifReady = event[1]['cameraStatus']
+    event = get_event()
+    curExposureMode = event[18]['currentExposureMode']
+    print curExposureMode
+    availMode= event[18]['exposureModeCandidates']
+    curShootMode = event[21]['currentShootMode']
+    curAperture = event[27]['currentFNumber']
+    availAperture = event[27]['fNumberCandidates']
+    curISO = event[29]['currentIsoSpeedRate']
+    avaiLISO = event[29]['isoSpeedRateCandidates']
+    curShutter = event[32]['currentShutterSpeed']
+    availShutter = event[32]['shutterSpeedCandidates']
 
-#NEW STUFF
+
+
+    return jsonify(mode=curExposureMode, videoMode=curShootMode, aperture=curAperture, shutter=curShutter, iso=curISO, avail_aperture=availAperture, avail_shutter=availShutter, avail_iso=avaiLISO)
+#NEW STUFF that communicate with javascrit file
 #
 @app.route('/takeVideo')
 def take_video_cb():
     take_video();
+    return "take video"
 
 @app.route('/stopVideo')
 def stop_video_cb():
     stop_video();
+    return "stop"
 
 @app.route('/setVideoMode')
 def set_video_mode():
-    videoMode();
+    result = videoMode();
+    return result
+
 
 @app.route('/setPictureMode')
 def set_picture_mode():
     pictureMode();
+    return "pic mode"
 
 @app.route('/setCameraOn')
 def set_camera_on():
@@ -289,6 +317,7 @@ slaveIP = '';
 cs = socket(AF_INET, SOCK_DGRAM)
 cs.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 cs.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+#videoMode()
 
-server = wsgi.WSGIServer(('10.0.1.2', 80), app)
+server = wsgi.WSGIServer(('localhost', 3000), app)
 server.serve_forever()

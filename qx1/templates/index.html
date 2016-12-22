@@ -51,12 +51,15 @@
             .col-md-6 {
                 padding-right: 8px;
             }
+            .fixed{
+                position: fixed;
+            }
 
 
         </style>
     <!-- END HEAD -->
 
-    <body class="page-quick-sidebar-open">
+    <body class="page-quick-sidebar-open fixed">
         <!-- BEGIN HEADER -->
 
         <!-- END HEADER -->
@@ -80,10 +83,14 @@
                             <div class="portlet-title">
                                 <div class="caption">
                                     <span class="caption-subject bold uppercase font-dark">Left Cam</span>
+                                    <span> Coordinates: </span>
+                                    <span id="coordinateLeft"></span>
                                 </div>
+                                <!--
                                 <div class="actions">
                                     <a class="btn btn-circle btn-icon-only btn-default fullscreen" href="#"> </a>
                                 </div>
+                                -->
                             </div>
                             <center><img width="390px" src="feed" ></img></center>
                         </div>
@@ -94,9 +101,11 @@
                                 <div class="caption">
                                     <span class="caption-subject bold uppercase font-dark">Right Cam</span>
                                 </div>
+                                <!--
                                 <div class="actions">
                                     <a class="btn btn-circle btn-icon-only btn-default fullscreen" href="#"> </a>
                                 </div>
+                                -->
                             </div>
                             <center><img width="390px" src="feed" ></img></center>
                         </div>
@@ -108,10 +117,45 @@
                     <button type="button" class="btn blue switchModeButton">
                         <span id="switch_button_text">Switch to Video Mode</span>
                     </button>
+                    
+                    <!--
+                    <button type="button" class="btn blue switchModeButton">
+                        <span id="switch_button_text">Switch to Picture Mode</span>
+                    </button>
+                    -->
+                    <span id="switch_button_icon"><i class="widget-thumb-icon bg-red fa fa-camera recordButton"></i></span>
+                    
+
+                    <!--
                         <span id="switch_button_icon"><i class="widget-thumb-icon bg-red icon-control-play recordButton"></i></span>
                     
-                    
+                    -->
                 </div>
+               
+                <br>
+                <br>
+                <br>
+                <table class="table" id="tableView">
+                        
+                            <tr id="first_row">
+                                <th>Mode</th>
+                                <th>Aperture</th>
+                                <th>Shutter Speed</th>
+                                <th>ISO</th>
+                            </tr>
+                        
+                        <tbody>
+                            <tr id="second_row">
+                                
+                                    <th class="first_cell"> updating..</th>
+                                    <th class="second_cell"> updating..</th>
+                                    <th class="third_cell"> updating..</th>
+                                    <th class="fourth_cell"> updating..</th>
+                            
+                            </tr>
+                        </tbody>
+                        
+                    </table>
                 
 
                 <!-- BEGIN FOOTER -->
@@ -145,31 +189,31 @@
                     <div class="tab-pane active page-quick-sidebar-chat" id="quick_sidebar_tab_1">
                         <div class="page-quick-sidebar-chat-users" data-rail-color="#ddd" data-wrapper-class="page-quick-sidebar-list">
                             <ul class="media-list list-items">
-                                <li class="media selMode">
+                                <li class="media selMode" id="modebox">
                                     <div class="media-body">
-                                        <h4 class="media-heading" id="mode">...</h4>
-                                        <div class="media-heading-sub"> Mode </div>
+                                        <h4 class="media-heading" id="mode"> Mode</h4>
+                                        <div class="media-heading-sub">  </div>
                                     </div>
                                 </li>
 
-                                <li class="media selAperture">
+                                <li class="media selAperture" id="aperturebox">
                                     <div class="media-body">
-                                        <h4 class="media-heading" id="aperture">...</h4>
-                                        <div class="media-heading-sub"> Aperture </div>
+                                        <h4 class="media-heading" id="aperture"> Aperture</h4>
+                                        <div class="media-heading-sub">  </div>
                                     </div>
                                 </li>
 
-                                <li class="media selShutter">
+                                <li class="media selShutter" id="shutterbox">
                                     <div class="media-body">
-                                        <h4 class="media-heading" id="shutter">...</h4>
-                                        <div class="media-heading-sub"> Shutter Speed </div>
+                                        <h4 class="media-heading" id="shutter"> Shutter</h4>
+                                        <div class="media-heading-sub">  </div>
                                     </div>
                                 </li>
 
-                                <li class="media selISO">
+                                <li class="media selISO" id="isobox">
                                     <div class="media-body">
-                                        <h4 class="media-heading" id="iso">...</h4>
-                                        <div class="media-heading-sub"> ISO </div>
+                                        <h4 class="media-heading" id="iso"> ISO</h4>
+                                        <div class="media-heading-sub">  </div>
                                     </div>
                                 </li>
 
@@ -182,7 +226,7 @@
                             </ul>
                         </div>
                         <div class="page-quick-sidebar-item">
-                            <div class="page-quick-sidebar-chat-user">
+                            <div class="page-quick-sidebar-chat-users">
                                 <div class="page-quick-sidebar-nav">
                                     <a href="javascript:;" class="page-quick-sidebar-back-to-list">
                                         <i class="icon-arrow-left"></i>&nbspBack&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp </a>
