@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-"""QX1 interfacing code for python"""
+# Interfaces with the Sony QX1 camera via the Sony Camera Remote API.
+#
 
 import json
 import requests
@@ -47,7 +48,7 @@ def get_payload(method, params):
     }
 
 def sony_api_call(action, params):
-    
+
     payload = get_payload(action, params)
     headers = {'Content-Type': 'application/json'}
     response = requests.post(cam_url, data=json.dumps(payload), headers=headers)
@@ -55,9 +56,11 @@ def sony_api_call(action, params):
     return a['result']
 
 def get_mode():
+    """Gets the current exposure mode of the camera."""
     return sony_api_call("getExposureMode", [])
 
 def set_mode(mode):
+    """Sets the exposure mode of the camera."""
     print "set mode myself and sending request to slave"
     cs.sendto(CONST_SET_EXPOSURE_MODE, (slaveIP, slavePort))
     sony_api_call("setExposureMode", [mode])
@@ -124,7 +127,7 @@ def videoMode():
     if r[0] == 0:
         s = "set video mode sucessfully"
     else:
-        s = "set video mode failed" 
+        s = "set video mode failed"
     return s
 
 def pictureMode():
@@ -200,7 +203,7 @@ def decode_frame(data):
 
     return jpg_data
 
-# initialization    
+# initialization
 app = Flask(__name__)
 app.secret_key = "super secret key"
 LVthread = LiveviewThread()
@@ -245,7 +248,7 @@ def set_iso_cb(iso=None):
     return "ok"
 
 @app.route('/_data', methods=['GET', 'POST'])
-def data_cb(): 
+def data_cb():
     #print "result is: "
     #event = get_event()
     #ifReady = event[1]['cameraStatus']
